@@ -3,6 +3,9 @@ version: '3.9'
 services:
   db:
     image: postgis/postgis
+    build:
+      tags:
+        - trailfunds-db:latest
     environment:
       POSTGRES_PASSWORD: 'postgres'
     ports:
@@ -13,7 +16,10 @@ services:
       - ./postgres:/var/lib/postgresql/data
 
   api:
-    build: .
+    build:
+      context: .
+      tags:
+        - trailfunds-api:latest
     restart: on-failure
     env_file:
       - .env
