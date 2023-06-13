@@ -1,0 +1,138 @@
+{
+	"taskDefinitionArn": "arn:aws:ecs:us-east-2:861573826272:task-definition/trailfunds-task-definition:2",
+	"containerDefinitions": [
+		{
+			"name": "api",
+			"image": "861573826272.dkr.ecr.us-east-2.amazonaws.com/trailfunds-api:latest",
+			"cpu": 0,
+			"portMappings": [
+				{
+					"name": "api-5000-tcp",
+					"containerPort": 5000,
+					"hostPort": 5000,
+					"protocol": "tcp",
+					"appProtocol": "http"
+				}
+			],
+			"essential": true,
+			"environment": [],
+			"environmentFiles": [
+				{
+					"value": "arn:aws:s3:::trailfunds-api-env/.env",
+					"type": "s3"
+				}
+			],
+			"mountPoints": [],
+			"volumesFrom": [],
+			"ulimits": [],
+			"logConfiguration": {
+				"logDriver": "awslogs",
+				"options": {
+					"awslogs-create-group": "true",
+					"awslogs-group": "/ecs/trailfunds-task-definition",
+					"awslogs-region": "us-east-2",
+					"awslogs-stream-prefix": "ecs"
+				}
+			}
+		},
+		{
+			"name": "db",
+			"image": "861573826272.dkr.ecr.us-east-2.amazonaws.com/trailfunds-db:latest",
+			"cpu": 0,
+			"portMappings": [
+				{
+					"name": "db-5432-tcp",
+					"containerPort": 5432,
+					"hostPort": 5432,
+					"protocol": "tcp",
+					"appProtocol": "http"
+				}
+			],
+			"essential": true,
+			"environment": [],
+			"environmentFiles": [
+				{
+					"value": "arn:aws:s3:::trailfunds-api-env/.env",
+					"type": "s3"
+				}
+			],
+			"mountPoints": [],
+			"volumesFrom": [],
+			"logConfiguration": {
+				"logDriver": "awslogs",
+				"options": {
+					"awslogs-create-group": "true",
+					"awslogs-group": "/ecs/trailfunds-task-definition",
+					"awslogs-region": "us-east-2",
+					"awslogs-stream-prefix": "ecs"
+				}
+			}
+		},
+		{
+			"name": "nginx",
+			"image": "861573826272.dkr.ecr.us-east-2.amazonaws.com/nginx:latest",
+			"cpu": 0,
+			"portMappings": [
+				{
+					"name": "nginx-80-tcp",
+					"containerPort": 80,
+					"hostPort": 80,
+					"protocol": "tcp",
+					"appProtocol": "http"
+				}
+			],
+			"essential": true,
+			"environment": [],
+			"environmentFiles": [],
+			"mountPoints": [],
+			"volumesFrom": []
+		}
+	],
+	"family": "trailfunds-task-definition",
+	"executionRoleArn": "arn:aws:iam::861573826272:role/ecsTaskExecutionRole",
+	"networkMode": "awsvpc",
+	"revision": 2,
+	"volumes": [],
+	"status": "ACTIVE",
+	"requiresAttributes": [
+		{
+			"name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+		},
+		{
+			"name": "ecs.capability.execution-role-awslogs"
+		},
+		{
+			"name": "com.amazonaws.ecs.capability.ecr-auth"
+		},
+		{
+			"name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+		},
+		{
+			"name": "ecs.capability.env-files.s3"
+		},
+		{
+			"name": "ecs.capability.execution-role-ecr-pull"
+		},
+		{
+			"name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+		},
+		{
+			"name": "ecs.capability.task-eni"
+		},
+		{
+			"name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+		}
+	],
+	"placementConstraints": [],
+	"compatibilities": ["EC2", "FARGATE"],
+	"requiresCompatibilities": ["FARGATE"],
+	"cpu": "1024",
+	"memory": "3072",
+	"runtimePlatform": {
+		"cpuArchitecture": "X86_64",
+		"operatingSystemFamily": "LINUX"
+	},
+	"registeredAt": "2023-06-07T23:58:46.703Z",
+	"registeredBy": "arn:aws:iam::861573826272:root",
+	"tags": []
+}
