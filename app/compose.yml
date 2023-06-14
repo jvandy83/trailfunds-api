@@ -2,19 +2,18 @@ version: '3.9'
 
 services:
   db:
-    image: postgis/postgis
+    image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/trailfunds-ecr-repo:postgres
     environment:
       POSTGRES_PASSWORD: 'postgres'
     ports:
       - '5432:5432'
-    restart: always
     volumes:
       - ./db/initdb:/docker-entrypoint-initdb.d
       - ./postgres:/var/lib/postgresql/data
 
   api:
+    image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/trailfunds-ecr-repo:api
     build: .
-    restart: on-failure
     env_file:
       - .env
     depends_on:
@@ -23,6 +22,7 @@ services:
       - 5000:5000
 
   nginx:
+    image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/trailfunds-ecr-repo:nginx
     build: ./nginx
     depends_on:
       - api
