@@ -1,0 +1,65 @@
+name: app
+services:
+  api:
+    build:
+      context: 861573826272.dkr.ecr.us-east-2.amazonaws.com/api
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_started
+    environment:
+      APN_ISSUER_KEY: L553P79X2S
+      APN_PUSH_KEY: 8282VA4546
+      APN_PUSH_TOKEN_SECRET: MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgKUo1eY31gzoNY6OyADg70dkCBO1XfSikpK5eRkmeQ5CgCgYIKoZIzj0DAQehRANCAAS2u98byfxk9ISl8RThPUpn+cj8YSXCM6BT5QCN+mZidEytUnEFjDztikvyhEUt7x0fWmS07LfMiD2gOQ93+DZf
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/postgres
+      DATABASE_URL_WITH_SCHEMA: postgresql://postgres:postgres@db:5432/postgres?schema=public&connect_timeout=300
+      NGROK_AUTH_TOKEN: 2NRXJrfFZKWGENlwG10mfIZLG7f_XvEq3pvaMF8XWgST23jy
+      POSTGRES_DB: postgres
+      POSTGRES_HOST: db
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      SECRET: secret
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 5000
+      published: "5000"
+      protocol: tcp
+  db:
+    environment:
+      POSTGRES_PASSWORD: postgres
+    image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/db
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 5432
+      published: "5432"
+      protocol: tcp
+    volumes:
+    - type: bind
+      source: /Users/jared/trailfunds-api/app/db/initdb
+      target: /docker-entrypoint-initdb.d
+      bind:
+        create_host_path: true
+    - type: bind
+      source: /Users/jared/trailfunds-api/app/postgres
+      target: /var/lib/postgresql/data
+      bind:
+        create_host_path: true
+  nginx:
+    depends_on:
+      api:
+        condition: service_started
+    image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/nginx
+    networks:
+      default: null
+    ports:
+    - mode: ingress
+      target: 80
+      published: "80"
+      protocol: tcp
+networks:
+  default:
+    name: app_default
