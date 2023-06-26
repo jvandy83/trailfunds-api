@@ -43,6 +43,10 @@ env:
 
 permissions:
   contents: read
+  
+defaults:
+  run:
+    working-directory: app
 
 jobs:
   deploy:
@@ -51,11 +55,9 @@ jobs:
     environment: production
 
     steps:
-      - working-directory: app
       - name: Checkout
         uses: actions/checkout@v3
         
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
