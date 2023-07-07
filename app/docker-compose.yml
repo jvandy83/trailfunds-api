@@ -1,31 +1,15 @@
 version: '3'
 
 services:
-  db:
-    image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/db
-    environment:
-      POSTGRES_PASSWORD: 'postgres'
-    ports:
-      - '5432:5432'
-    volumes:
-      - ./db/initdb:/docker-entrypoint-initdb.d
-      - ./postgres:/var/lib/postgresql/data
-
   api:
-    build: 861573826272.dkr.ecr.us-east-2.amazonaws.com/api
+    build: .
+    # image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/api:latest
     env_file:
       - .env
-    depends_on:
-      - db
     ports:
       - 5000:5000
 
-  nginx:
-    image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/nginx
-    depends_on:
-      - api
-    ports:
-      - 80:80
-
-volumes:
-  postgres:
+  # nginx:
+  #   image: 861573826272.dkr.ecr.us-east-2.amazonaws.com/nginx
+  #   ports:
+  #     - 80:80
