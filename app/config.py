@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     apn_push_token_secret: str
     apn_push_key: str
     apn_issuer_key: str
+    stripe_api_key_prod: str
+    stripe_api_key_dev: str
 
     class Config:
         env_file = ".env"
