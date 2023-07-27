@@ -102,20 +102,6 @@ CREATE TABLE public."TrailOrg" (
 ALTER TABLE public."TrailOrg" OWNER TO postgres;
 
 --
--- Name: Trailbucks; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public."Trailbucks" (
-    id text NOT NULL,
-    created_at timestamp(3) without time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    amount integer DEFAULT 0 NOT NULL,
-    user_id text NOT NULL
-);
-
-
-ALTER TABLE public."Trailbucks" OWNER TO postgres;
-
---
 -- Name: Transactions; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -2715,15 +2701,6 @@ clhcomc69000081jjgqd2cncx	COPMOBA
 
 
 --
--- Data for Name: Trailbucks; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."Trailbucks" (id, created_at, amount, user_id) FROM stdin;
-clhcq42em000181aimhgd1tta	2023-05-07 01:16:39.598	145	clhcq42em000081airv9zzkw4
-\.
-
-
---
 -- Data for Name: Transactions; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
@@ -2881,14 +2858,6 @@ ALTER TABLE ONLY public."Trail"
 
 
 --
--- Name: Trailbucks Trailbucks_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Trailbucks"
-    ADD CONSTRAINT "Trailbucks_pkey" PRIMARY KEY (id);
-
-
---
 -- Name: Transactions Transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -2909,13 +2878,6 @@ ALTER TABLE ONLY public."User"
 --
 
 CREATE UNIQUE INDEX "Notification_trail_id_key" ON public."Notification" USING btree (trail_id);
-
-
---
--- Name: Trailbucks_user_id_key; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE UNIQUE INDEX "Trailbucks_user_id_key" ON public."Trailbucks" USING btree (user_id);
 
 
 --
@@ -2971,14 +2933,6 @@ ALTER TABLE ONLY public."Trail"
 
 ALTER TABLE ONLY public."Trail"
     ADD CONSTRAINT "Trail_trail_org_id_fkey" FOREIGN KEY (trail_org_id) REFERENCES public."TrailOrg"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
-
-
---
--- Name: Trailbucks Trailbucks_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public."Trailbucks"
-    ADD CONSTRAINT "Trailbucks_user_id_fkey" FOREIGN KEY (user_id) REFERENCES public."User"(id) ON UPDATE CASCADE ON DELETE RESTRICT;
 
 
 --

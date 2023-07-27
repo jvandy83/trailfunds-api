@@ -1,4 +1,4 @@
-from src.prisma import prisma, Trail, TrailOrg
+from models.prisma import prisma, Trail, TrailOrg
 
 import json
 

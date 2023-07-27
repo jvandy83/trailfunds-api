@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from src.prisma import User
+from models.prisma import User
 
 from config import Settings
 
@@ -41,7 +41,7 @@ async def sign_up(user: UserSignUp):
     existing_user = await User.find_first(where={"email": user.email})
 
     if existing_user is not None:
-        raise HTTPException(status_code=404, detail="E-mail is already in use")
+        return {"status_code": 403, "error": {"message": "E-mail is already in use"}}
 
     hashed_password = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
 
@@ -51,11 +51,6 @@ async def sign_up(user: UserSignUp):
             "last_name": user.lastName,
             "email": user.email,
             "password": hashed_password.decode(),
-            "trailbucks": {
-                "create": {
-                    "amount": 0,
-                }
-            },
         }
     )
 
@@ -66,6 +61,7 @@ async def sign_up(user: UserSignUp):
     access_token = jwt.encode({"id": created_user.id}, settings.secret, "HS256")
 
     return {
+        "status_code": 200,
         "currentUser": {
             "email": created_user.email,
             "firstName": created_user.first_name,
@@ -83,13 +79,11 @@ async def login(user: UserLogin):
     if existing_user:
         hashed_password = existing_user.password
 
-        if (
-            bcrypt.checkpw(
-                user.password.encode("utf-8"), hashed_password.encode("utf-8")
-            )
-            and existing_user is not None
-        ):
-            # update user.is_new = false
+        password_matches = bcrypt.checkpw(
+            user.password.encode("utf-8"), hashed_password.encode("utf-8")
+        )
+
+        if password_matches and existing_user is not None:
             updated_user = await User.update(
                 where={
                     "id": existing_user.id,
@@ -102,18 +96,21 @@ async def login(user: UserLogin):
             )
 
             access_token = jwt.encode(
-                {"id": updated_user.id, "isNew": updated_user.is_new}, settings.secret
+                {"id": existing_user.id, "isNew": updated_user.is_new}, settings.secret
             )
 
             return {
+                "status_code": 200,
                 "currentUser": {
-                    "email": updated_user.email,
-                    "firstName": updated_user.first_name,
-                    "lastName": updated_user.last_name,
-                    "id": updated_user.id,
+                    "email": existing_user.email,
+                    "firstName": existing_user.first_name,
+                    "lastName": existing_user.last_name,
+                    "id": existing_user.id,
                 },
                 "accessToken": access_token,
             }
+        else:
+            return {"error": {"message": "E-mail or password is incorrect"}}
 
     else:
-        raise HTTPException(status_code=404, detail="Username or password in incorrect")
+        raise HTTPException(status_code=500, detail="Something went wrong")

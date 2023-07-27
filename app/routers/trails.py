@@ -20,7 +20,7 @@ from fastapi import APIRouter
 
 from geopy.distance import geodesic
 
-from src.prisma import prisma, Trail, Notification
+from models.prisma import prisma, Trail, Notification
 
 settings = Settings()
 

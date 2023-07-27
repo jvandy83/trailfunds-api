@@ -10,7 +10,7 @@ from dependencies import get_auth
 
 import stripe
 
-from src.prisma import Trailbucks as TrailbucksModel, Transaction, TrailOrg, Trail
+from models.prisma import Transaction, TrailOrg, Trail
 
 from config import Settings
 
@@ -30,11 +30,6 @@ class Donation(BaseModel):
     amount: str
     userId: str
     trailId: str
-
-
-class Trailbucks(BaseModel):
-    amount: str
-    userId: str
 
 
 router = APIRouter(
@@ -71,80 +66,77 @@ async def make_payment_intent(amount: str):
         return {"message": "Error"}
 
 
-@router.post("/trailbucks")
-async def add_trailbucks(data: Trailbucks):
-    existing_trailbucks_account = await TrailbucksModel.find_unique(
-        where={"user_id": data.userId}
-    )
+# @router.post("/trailbucks")
+# async def add_trailbucks(data: Trailbucks):
+#     existing_trailbucks_account = await TrailbucksModel.find_unique(
+#         where={"user_id": data.userId}
+#     )
 
-    # this will eventually involve calling/receiving
-    # a balance from the users financial account
+#     if existing_trailbucks_account is not None:
+#         current_balance = existing_trailbucks_account.amount
+#         deposit = int(data.amount)
+#         await TrailbucksModel.update(
+#             where={"user_id": data.userId}, data={"amount": current_balance + deposit}
+#         )
 
-    if existing_trailbucks_account is not None:
-        current_balance = existing_trailbucks_account.amount
-        deposit = int(data.amount)
-        await TrailbucksModel.update(
-            where={"user_id": data.userId}, data={"amount": current_balance + deposit}
-        )
+#         return {"msg": "success"}
 
-        return {"msg": "success"}
+#     try:
+#         trailbucks = await TrailbucksModel.create(
+#             data={
+#                 "amount": int(data.amount),
+#                 "user_id": data.userId,
+#             },
+#         )
+#         print(trailbucks)
+#     except Exception as e:
+#         print("Error: ", e)
 
-    try:
-        trailbucks = await TrailbucksModel.create(
-            data={
-                "amount": int(data.amount),
-                "user_id": data.userId,
-            },
-        )
-        print(trailbucks)
-    except Exception as e:
-        print("Error: ", e)
-
-    return {"Error": e}
+#     return {"Error": e}
 
 
-@router.post("/donate")
-async def donate_trailbucks(data: Donation):
-    existing_trailbucks_account = await TrailbucksModel.find_unique(
-        where={"user_id": data.userId}
-    )
+# @router.post("/donate")
+# async def donate_trailbucks(data: Donation):
+#     existing_trailbucks_account = await TrailbucksModel.find_unique(
+#         where={"user_id": data.userId}
+#     )
 
-    trail_data = await Trail.find_unique(where={"id": data.trailId})
+#     trail_data = await Trail.find_unique(where={"id": data.trailId})
 
-    # this will eventually involve calling/receiving
-    # a balance from a Trailfunds stripe account
+#     # this will eventually involve calling/receiving
+#     # a balance from a Trailfunds stripe account
 
-    if existing_trailbucks_account is not None:
-        current_balance = existing_trailbucks_account.amount
-        donation = int(data.amount)
-        await TrailbucksModel.update(
-            where={"user_id": data.userId}, data={"amount": current_balance - donation}
-        )
+#     if existing_trailbucks_account is not None:
+#         current_balance = existing_trailbucks_account.amount
+#         donation = int(data.amount)
+#         await TrailbucksModel.update(
+#             where={"user_id": data.userId}, data={"amount": current_balance - donation}
+#         )
 
-        transaction = await Transaction.create(
-            data={
-                "amount": int(data.amount),
-                "user_id": data.userId,
-                "trail_org_id": trail_data.trail_org_id,
-                "trail_id": data.trailId,
-                "confirmation_number": str(uuid.uuid4())[5:12],
-            },
-        )
+#         transaction = await Transaction.create(
+#             data={
+#                 "amount": int(data.amount),
+#                 "user_id": data.userId,
+#                 "trail_org_id": trail_data.trail_org_id,
+#                 "trail_id": data.trailId,
+#                 "confirmation_number": str(uuid.uuid4())[5:12],
+#             },
+#         )
 
-        print("***transaction.id inside Donate endpoint***: ", transaction.id)
+#         print("***transaction.id inside Donate endpoint***: ", transaction.id)
 
-        return transaction.id
+#         return transaction.id
 
-    return {"msg": "Please add funds to your Trailbucks account :)"}
+#     return {"msg": "Please add funds to your Trailbucks account :)"}
 
 
-@router.get("/current-balance")
-async def get_current_balance(user: Annotated[User, Depends(get_auth)]):
-    current_account = await TrailbucksModel.find_unique(where={"user_id": user["id"]})
+# @router.get("/current-balance")
+# async def get_current_balance(user: Annotated[User, Depends(get_auth)]):
+#     current_account = await TrailbucksModel.find_unique(where={"user_id": user["id"]})
 
-    current_balance = current_account.amount
+#     current_balance = current_account.amount
 
-    return current_balance
+#     return current_balance
 
 
 @router.get("/transactions")

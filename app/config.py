@@ -13,4 +13,4 @@ class Settings(BaseSettings):
     stripe_api_key_dev: str
 
     class Config:
-        env_file = ".env"
+        env_file = ".env.local"
