@@ -3,9 +3,6 @@ version: '3.9'
 services:
   db:
     image: postgis/postgis
-    build:
-      tags:
-        - trailfunds-db:latest
     environment:
       POSTGRES_PASSWORD: 'postgres'
     ports:
@@ -16,10 +13,7 @@ services:
       - ./postgres:/var/lib/postgresql/data
 
   api:
-    build:
-      context: .
-      tags:
-        - trailfunds-api:latest
+    build: .
     restart: on-failure
     env_file:
       - .env
@@ -29,23 +23,6 @@ services:
       - 5000:5000
     volumes:
       - .:/code/app
-
-  # ngrok:
-  #   image: ngrok/ngrok:latest
-  #   restart: unless-stopped
-  #   links:
-  #     - api
-  #   command:
-  #     - 'start'
-  #     - '--all'
-  #     - '--config'
-  #     - '/etc/ngrok.yml'
-  #   ports:
-  #     - 4040:4040
-  #   environment:
-  #     NGROK_PORT: api:5000
-  #   volumes:
-  #     - ./ngrok.yml:/etc/ngrok.yml
 
 volumes:
   postgres:

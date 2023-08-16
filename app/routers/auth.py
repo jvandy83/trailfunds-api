@@ -66,6 +66,7 @@ async def sign_up(user: UserSignUp):
     access_token = jwt.encode({"id": created_user.id}, settings.secret, "HS256")
 
     return {
+        "status_code": 200,
         "currentUser": {
             "email": created_user.email,
             "firstName": created_user.first_name,
@@ -106,6 +107,7 @@ async def login(user: UserLogin):
             )
 
             return {
+                "status_code": 200,
                 "currentUser": {
                     "email": updated_user.email,
                     "firstName": updated_user.first_name,
