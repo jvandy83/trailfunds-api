@@ -155,7 +155,7 @@ async def search_trails(query: str):
     trails = []
 
     if len(query) > 0:
-        trails = await Trail.find_many(take=10, where={"name": {"contains": query}})
+        trails = await Trail.find_many(take=10, where={"name": {"contains": query, "mode": "insensitive"}})
 
         return {"trails": trails}
 

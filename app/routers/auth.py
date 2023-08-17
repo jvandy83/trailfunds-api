@@ -41,40 +41,42 @@ async def sign_up(user: UserSignUp):
     existing_user = await User.find_first(where={"email": user.email})
 
     if existing_user is not None:
-        raise HTTPException(status_code=404, detail="E-mail is already in use")
+        raise HTTPException(status_code=401, detail="E-mail is already in use")
+    
+    else:
 
-    hashed_password = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
+        hashed_password = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
 
-    created_user = await User.create(
-        data={
-            "first_name": user.firstName,
-            "last_name": user.lastName,
-            "email": user.email,
-            "password": hashed_password.decode(),
-            "trailbucks": {
-                "create": {
-                    "amount": 0,
-                }
-            },
-        }
-    )
+        created_user = await User.create(
+            data={
+                "first_name": user.firstName,
+                "last_name": user.lastName,
+                "email": user.email,
+                "password": hashed_password.decode(),
+                "trailbucks": {
+                    "create": {
+                        "amount": 0,
+                    }
+                },
+            }
+        )
 
     # find better way to exclude
     # password using a query
     # or using decorator in prisma file
 
-    access_token = jwt.encode({"id": created_user.id}, settings.secret, "HS256")
+        access_token = jwt.encode({"id": created_user.id}, settings.secret, "HS256")
 
-    return {
-        "status_code": 200,
-        "currentUser": {
-            "email": created_user.email,
-            "firstName": created_user.first_name,
-            "lastName": created_user.last_name,
-            "id": created_user.id,
-        },
-        "accessToken": access_token,
-    }
+        return {
+            "status_code": 200,
+            "currentUser": {
+                "email": created_user.email,
+                "firstName": created_user.first_name,
+                "lastName": created_user.last_name,
+                "id": created_user.id,
+            },
+            "accessToken": access_token,
+        }
 
 
 @router.post("/login")
@@ -116,6 +118,8 @@ async def login(user: UserLogin):
                 },
                 "accessToken": access_token,
             }
+        else:
+            raise HTTPException(status_code=403, detail="Username or password is incorrect")
 
     else:
-        raise HTTPException(status_code=404, detail="Username or password in incorrect")
+        raise HTTPException(status_code=403, detail="Username or password is incorrect")
