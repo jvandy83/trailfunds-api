@@ -10,13 +10,12 @@ from dependencies import get_auth
 
 import stripe
 
-from models.prisma import Transaction, Trailbucks as TrailbucksModel, TrailOrg, Trail
+from models.prisma import TrailbucksModel, Transaction, TrailOrg, Trail
 
-from config import Settings
-
-settings = Settings()
-
-stripe.api_key = settings.stripe_api_key_dev
+stripe.api_key = "sk_test_D4pNByx08dJpJShCHbDp79Y70007pq01Qn"
+# stripe.ApplePayDomain.create(
+#   domain_name="trailfunds.ngrok.io"
+# )
 
 
 class User(BaseModel):
@@ -30,6 +29,7 @@ class Donation(BaseModel):
     amount: str
     userId: str
     trailId: str
+
 
 class Trailbucks(BaseModel):
     amount: str
@@ -75,6 +75,9 @@ async def add_trailbucks(data: Trailbucks):
     existing_trailbucks_account = await TrailbucksModel.find_unique(
         where={"user_id": data.userId}
     )
+
+    # this will eventually involve calling/receiving
+    # a balance from the users financial account
 
     if existing_trailbucks_account is not None:
         current_balance = existing_trailbucks_account.amount

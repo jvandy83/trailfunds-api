@@ -7,4 +7,4 @@ Trail = prisma.trail
 Transaction = prisma.transactions
 TrailOrg = prisma.trailorg
 Notification = prisma.notification
-Trailbucks = prisma.trailbucks
+TrailbucksModel = prisma.trailbucks
