@@ -8,9 +8,11 @@ from pydantic import BaseModel
 
 from dependencies import get_auth
 
+from controllers.Stripe import Stripe
+
 import stripe
 
-from models.prisma import TrailbucksModel, Transaction, TrailOrg, Trail
+from models.prisma import TrailbucksModel, Transaction, TrailOrg, Trail, User as UserModel
 
 stripe.api_key = "sk_test_D4pNByx08dJpJShCHbDp79Y70007pq01Qn"
 # stripe.ApplePayDomain.create(
@@ -35,6 +37,12 @@ class Trailbucks(BaseModel):
     amount: str
     userId: str
 
+class CheckoutSession(BaseModel):
+    productId: str
+
+class PortalSession(BaseModel):
+    sessionId: str
+
 
 router = APIRouter(
     prefix="/api/v1",
@@ -45,24 +53,18 @@ router = APIRouter(
 
 
 @router.get("/payment-intents/{amount}")
-async def make_payment_intent(amount: str):
+async def make_payment_intent(amount: str, user: Annotated[User, Depends(get_auth)]):
+    current_user = await UserModel.find_unique(where={"id": user["id"]})
     try:
-        customer = stripe.Customer.create(name="Jared")
-        ephemeral_key = stripe.EphemeralKey.create(
-            customer=customer["id"],
-            stripe_version="2020-03-02",
-        )
+        client = Stripe()
 
-        payment_intent = stripe.PaymentIntent.create(
-            amount=int(amount) * 100, currency="USD", customer=customer.id
-        )
+        payment_intent = client.initiatePayment(amount=amount, customerId=current_user.id, email= current_user.email, customerName= f"{current_user.first_name} {current_user.last_name}")
+
+        print("PAYMENT INTENT: ", payment_intent)
 
         return {
             "message": "Payment initiated!",
-            "paymentIntent": payment_intent.client_secret,
-            "customer": customer,
-            "ephemeralKey": ephemeral_key.secret,
-            "data": payment_intent,
+            "paymentIntent": payment_intent,
         }
 
     except Exception as e:
@@ -72,16 +74,20 @@ async def make_payment_intent(amount: str):
 
 @router.post("/trailbucks")
 async def add_trailbucks(data: Trailbucks):
+
+    print("DATA INSIDE TRAILBUCKS: ", data)
     existing_trailbucks_account = await TrailbucksModel.find_unique(
         where={"user_id": data.userId}
     )
+
+    print("EXISTING TRAILBUCKS: ", existing_trailbucks_account)
 
     # this will eventually involve calling/receiving
     # a balance from the users financial account
 
     if existing_trailbucks_account is not None:
         current_balance = existing_trailbucks_account.amount
-        deposit = int(data.amount)
+        deposit = float(data.amount) * 100
         await TrailbucksModel.update(
             where={"user_id": data.userId}, data={"amount": current_balance + deposit}
         )
@@ -91,7 +97,7 @@ async def add_trailbucks(data: Trailbucks):
     try:
         trailbucks = await TrailbucksModel.create(
             data={
-                "amount": int(data.amount),
+                "amount": int(data.amount) * 100,
                 "user_id": data.userId,
             },
         )
@@ -115,14 +121,16 @@ async def donate_trailbucks(data: Donation):
 
     if existing_trailbucks_account is not None:
         current_balance = existing_trailbucks_account.amount
-        donation = int(data.amount)
+        print("current_balance: ", current_balance)
+        donation = float(data.amount)
+        print("donation amount: ", donation)
         await TrailbucksModel.update(
             where={"user_id": data.userId}, data={"amount": current_balance - donation}
         )
 
         transaction = await Transaction.create(
             data={
-                "amount": int(data.amount),
+                "amount": float(data.amount),
                 "user_id": data.userId,
                 "trail_org_id": trail_data.trail_org_id,
                 "trail_id": data.trailId,
@@ -139,11 +147,15 @@ async def donate_trailbucks(data: Donation):
 
 @router.get("/current-balance")
 async def get_current_balance(user: Annotated[User, Depends(get_auth)]):
+    print("INSIDE CURRENT BALANCE")
+    print("USER: ", user)
     current_account = await TrailbucksModel.find_unique(where={"user_id": user["id"]})
+
+    print("current_account: ", current_account)
 
     current_balance = current_account.amount
 
-    return current_balance
+    return current_balance / 100
 
 
 @router.get("/transactions")
@@ -156,6 +168,27 @@ async def get_transactions(user: Annotated[User, Depends(get_auth)]):
 
     return transactions_trail_orgs
 
+
+@router.post("/create-checkout-session")
+async def create_checkout_session(productId: CheckoutSession, user: Annotated[User, Depends(get_auth)]):
+    client = Stripe()
+
+    current_user = await UserModel.find_unique(where={"id": user["id"]})
+
+    client_secret = client.initiateSubscription(email=current_user.email, customerName=f"{current_user.first_name} {current_user.last_name}", productId=productId, customerId=current_user.id)
+
+    print("PAYMENT INTENT CREATE CHECKOUT SESSION: ", client_secret)
+
+    return {
+            "message": "Payment initiated!",
+            "clientSecret": client_secret,
+        }
+
+@router.post("/create-portal-session")
+async def create_portal_session(sessionId: PortalSession):
+    print("SESSION_ID: ", sessionId)
+
+    return {"msg": "success"}
 
 @router.get("/transaction/{transactionId}")
 async def get_transaction(transactionId: str):

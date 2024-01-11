@@ -51,6 +51,11 @@ async def sign_up(user: UserSignUp):
             "last_name": user.lastName,
             "email": user.email,
             "password": hashed_password.decode(),
+            "trailbucks": {
+                "create": {
+                    "amount": 0
+                }
+            }
         }
     )
 
@@ -74,7 +79,9 @@ async def sign_up(user: UserSignUp):
 
 @router.post("/login")
 async def login(user: UserLogin):
+    print("INSIDE LOGIN")
     existing_user = await User.find_first(where={"email": user.email})
+    print(existing_user)
 
     if existing_user:
         hashed_password = existing_user.password

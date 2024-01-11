@@ -66,12 +66,13 @@ async def shutdown():
     await prisma.disconnect()
 
 
-@app.get("/")
+@app.get("/health")
 async def root():
     return {"msg": "server is running"}
 
 
 @app.get("/seed-db")
 async def add_trails():
+    print("inside seed db")
     res = await seed_db()
     return res
