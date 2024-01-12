@@ -32,7 +32,7 @@ async def seed_db():
 
             trail_org = await TrailOrg.create(data=({"name": "COPMOBA"}))
 
-            print("***trail_org***: ", trail_org)
+            filtered_trails = []
 
             for trail in trails:
                 filtered_trail = {
@@ -43,8 +43,6 @@ async def seed_db():
                 updated_trail = await Trail.create(
                     data={**filtered_trail, "trail_org_id": trail_org.id}
                 )
-
-                print("***updated_trail dict***: ", dict(updated_trail))
 
                 filtered_trails.append(dict(updated_trail))
 

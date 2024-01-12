@@ -54,13 +54,14 @@ router = APIRouter(
 
 @router.get("/payment-intents/{amount}")
 async def make_payment_intent(amount: str, user: Annotated[User, Depends(get_auth)]):
+    amount_plus_transaction_fee = round(float(amount) + ((float(amount) * 0.029) + .3), 2)
+
     current_user = await UserModel.find_unique(where={"id": user["id"]})
+
     try:
         client = Stripe()
 
-        payment_intent = client.initiatePayment(amount=amount, customerId=current_user.id, email= current_user.email, customerName= f"{current_user.first_name} {current_user.last_name}")
-
-        print("PAYMENT INTENT: ", payment_intent)
+        payment_intent = client.initiatePayment(amount=round(amount_plus_transaction_fee, 2), customerId=current_user.id, email= current_user.email, customerName= f"{current_user.first_name} {current_user.last_name}")
 
         return {
             "message": "Payment initiated!",
@@ -75,12 +76,9 @@ async def make_payment_intent(amount: str, user: Annotated[User, Depends(get_aut
 @router.post("/trailbucks")
 async def add_trailbucks(data: Trailbucks):
 
-    print("DATA INSIDE TRAILBUCKS: ", data)
     existing_trailbucks_account = await TrailbucksModel.find_unique(
         where={"user_id": data.userId}
     )
-
-    print("EXISTING TRAILBUCKS: ", existing_trailbucks_account)
 
     # this will eventually involve calling/receiving
     # a balance from the users financial account
@@ -176,8 +174,6 @@ async def create_checkout_session(productId: CheckoutSession, user: Annotated[Us
     current_user = await UserModel.find_unique(where={"id": user["id"]})
 
     client_secret = client.initiateSubscription(email=current_user.email, customerName=f"{current_user.first_name} {current_user.last_name}", productId=productId, customerId=current_user.id)
-
-    print("PAYMENT INTENT CREATE CHECKOUT SESSION: ", client_secret)
 
     return {
             "message": "Payment initiated!",
