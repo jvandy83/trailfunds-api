@@ -14,7 +14,9 @@ import stripe
 
 from models.prisma import TrailbucksModel, Transaction, TrailOrg, Trail, User as UserModel
 
-stripe.api_key = "sk_test_D4pNByx08dJpJShCHbDp79Y70007pq01Qn"
+from config import settings
+
+stripe.api_key = settings.api_key
 # stripe.ApplePayDomain.create(
 #   domain_name="trailfunds.ngrok.io"
 # )
